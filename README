@@ -1,0 +1,140 @@
+README RobotRemCtrlFW 
+===============================================================================
+26.10.2011, sw@kaltpost.de
+
+Introduction
+-------------------------------------------------------------------------------
+
+This project provieds a firmware for STM32 based robots. For more detail see
+
+	http://gpio.kaltpost.de/?page_id=527
+
+Requirements
+-------------------------------------------------------------------------------
+
+To successfully execute all the targets from this make file project, beside a C cross compiler environment for ARM Cortex-M3, the following packages must be present on your host system:
+ 
+* astyle (optional)
+* cppcheck (optional)
+* doxygen (optional)
+
+
+Directory Layout
+-------------------------------------------------------------------------------
+
+The directory and file layout of the project is as follows:
+
+ProjectDir
+  bin/                executables created from "src/"
+  deploy/             deployables are placed here
+  doc/                documentation regarding this project
+    gen/              source code documentation generated from "src/include"
+  lib/                libraries ctreated from "src/", used to unit test "src/"
+  src/                C sources for the project
+    include/          header files for the project sources in "src/"
+  test-bin/           executable unit tests created from "test-src"
+  test-src/           C test sources
+    include/          header files for the project test sources in "test-src/"
+  CHANGELOG           change log describing project changes for each release             
+  README              short introduction and description of this project
+  doxygen.conf        configuration file for doxygen
+  Makefile            top level make file
+  common.mk           make file include commonly used, project independent
+  project.mk          make file include commonly used, project dependent  
+
+
+Default Targets of Top Level Make File
+-------------------------------------------------------------------------------
+
+The top level makefile in the project directory is the master make file. It defines a set of default targets, and delegates most of its task to the sub-makefile in "src" and "test-src".
+
+The default make targets are:
+
+target        compile and link the executable, place it under "bin/"
+ 
+target-test   compile and link the test executable, place it under "test-bin/"
+
+gen-docs      perform "target" first, then generate source code documentation 
+              from "src/include/" under "doc/gen/"
+              
+check         execute "cppcheck" on all "*.cpp" files unter "src/", print 
+              results to stdout
+              
+style         enforce basic code styles on cpp/h files in "src/" and 
+              "src/include/", on modifications, the original file is
+              backed up with extension ".orig"
+              
+all           perform task "target"
+
+world         perform tasks "target", "target-test", "gen-docs"
+ 
+clean         cleanup all objects, executables and backup files   
+
+deploy-src    perform task "clean", then tar the contetens of the current
+              directory into <target_name>_sources.tar.bz2 (but exclude
+              ".svn"), and place it into "deploy/" - useful to archive 
+              sources ...
+              
+The most common targets will be explained in more detail in the next
+paragraphs.
+
+
+target: Compile the Binary
+-------------------------------------------------------------------------------
+
+To compile the example sources located under "src" type:
+
+  make
+
+This will produce the binary "hello_world" under "bin". If executed it will 
+just print a friendly hello. 
+
+
+target-test: Compile the Test-Binary
+-------------------------------------------------------------------------------
+
+To compile the test binary sources located under "test-src" type:
+
+  make target-test
+
+This will produce the binary under "test-bin".  
+
+check: Perform Static Code Checking
+-------------------------------------------------------------------------------
+
+For basic static code checking, cppcheck is used. To execute a static code check, you may call:
+
+  make check
+
+This will performe the checks on all files located under "src". Static code checks are not performed on the test code located under "test-src" by default. To check the test sources too, uncommented the corresponding line in the top-level makefile.
+
+
+gen-docs: Generation of Code Documentation
+-------------------------------------------------------------------------------
+
+For generating the source code documentation out of the annotations done in the code, we use doxygen. The generation of the HTML based documentation from the sources under "src" is done through:
+
+  make gen-docs
+
+The result will be placed in "doc/gen". 
+
+Note: For "test-src" no documentation is generated.  
+
+
+style: Apply Code Formating Styles
+-------------------------------------------------------------------------------
+
+It is possible to enforce basic code formating styles through astyle by executing the "style" target:
+
+  make style
+  
+This calls astyle with parameter "--style=stroustrup", resulting in something like this:
+
+  int Foo(bool isBar) 
+  {
+     if (isBar) {
+          bar();
+          return 1;
+     } else
+          return 0;
+  }
