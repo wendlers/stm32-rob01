@@ -1,0 +1,350 @@
+<h2>Introduction</h2>
+
+This article gives a brief overview of my first robot project. Primary goal of the project was to build a small robot which is able to drive autonomous as well as remote controlled by a human. The result is rob01 which currently has the following features: 
+
+Drives autonomously, tries to avoid obstacles. To detect obstacles, two distance sensors are used. Also the average wheel turns are measured continously to detect if the robot is stuck. The robot also provides a shell to which one could log in through a wireless connection. On the shell a bunch of parameters could be monitored or set, and the robot could be driven remote controlled. 
+
+Programming of the robots firmware was done completely by using open source tools. For compiling, the ARM gcc form the "Summon ARM Toolchain" [TODO link] is used, and as a kick start for accessing the hardware functionality, "libopencm3" [TODO link] is used. 
+
+<h2>Parts Used</h2>
+
+The following table shows a more or less complete list of the parts used to build rob01:
+
+<table>
+<tr><td>Part</td><td>Ref.</td><td>Quantity</td></tr>
+<tr><td>MCU</td><td>STM32 Discovery</td><td>1</td></tr>
+<tr><td>Chassis</td><td>Arexx ARX-CH09</td><td>1</td></tr>
+<tr><td>Battery</td><td>9V</td><td>2</td></tr>
+<tr><td>Battery holder</td><td>9V</td><td>2</td></tr>
+<tr><td>Reflectance sensor</td><td>Pololu QTR-1RC</td><td>2</td></tr>
+<tr><td>Distance sensor</td><td>Pololu GP2Y</td><td>2</td></tr>
+<tr><td>Dual motor driver</td><td>Toshiba TB6612FNG</td><td>1</td></tr>
+<tr><td>Wireless</td><td>XBee PRO Znet 2.5</td><td>2</td></tr>
+<tr><td>XBee sheeld to USB</td><td>Make XBee conctable to PC</td><td>1</td></tr>
+<tr><td>XBee sheeld for breadboard</td><td>Make XBee conectable to 2,52 grid.</td><td>1</td></tr>
+<tr><td>Voltage Regulator</td><td>5V 7805</td><td>1</td></tr>
+<tr><td>Voltage Regulator</td><td>3.3V 1086</td><td>1</td></tr>
+<tr><td>Capacaitor C1</td><td>0.33uF</td><td>1</td></tr>
+<tr><td>Capacitor C2</td><td> 0.1uF</td><td>1</td></tr>
+<tr><td>Capacitor C3+C4</td><td> 10uF</td><td>2</td></tr>
+<tr><td>LED PWR_LED1+PWR_LED2</td><td>3mm blue</td><td>2</td></tr>
+<tr><td>Resistor R1</td><td> 68 Ohm</td><td>1</td></tr>
+<tr><td>Power Switches S1+S2</td><td>Two State Power Switches</td><td>2</td></tr>
+<tr><td>Female connectors</td><td> for STM32, XBee, TB6612FNG</td><td>many</td></tr>
+</table>
+
+<h3>MCU</h3>
+
+As an MCU, the STM32 Discovery [TODO link],an ARM Cortex-M3 based CPU was used.The STM32 Discovery is available for a few bucks (about 12USD/Euro). It is way overkill for the purpose of building a small robot like this, but the intension was to learn more about the Cortex-M3. As a core library to access the STM32 hardware, the libopencm3 [TODO: link] was used. 
+
+<h3>Chasis</h3>
+
+As a bsae for the chasis, the Arexx ARX-CH09 was used. It has two wheels, each with its own geared DC motor.Also a small extension plate to solder your own stuff on could be mounted. I did not use this plate since it is way to small to hold the STM32 plus the wireless XBee module puls the motor controller. Instead, I mounted a standard 160x100 plate on top of the chasis. 
+
+<h3>Batteries and Batterie Holders</h3>
+
+The ARX-CH09 also comes with a battery holder for four AA bateries. I decided not to use this because of two reasons: First I wanted to use separete power for MCU and motors (since the motors are likely to producre noise on the power supply). And secondly I wanted to use a regulator for the power supply to avoid the motors becoming slower when then battery voltage decreases. Thus, I replaced the Arexx battery holder with two holders for 9V battery packs, which barely fit on the lower level of the chasis. 
+
+<h3>Sensors for Obstacle Detection</h3>
+ 
+For obstacle detected, two bumper sensors (Pololu GP2Y) are used. They use IR reflection to detect an obstacle in the range of approximately 10cm. When an obstacle is detected, the data line is set to high. It is not possible to measure the distance with this sensors. The sensors are mouted on the chasis base plate on the left and right front. 
+
+<h3>Sesnsors for Odometrie</h3>
+
+To be able to count the wheel turns, two more reflectance sensors are used (Pololu QTR-1RC). They use IR light to detecte how much the surface of an object in the range between 0.2cm and 3cm reflects the light. By having one of the gears black colored markers, the transitions between balck-white and white-black could be counted.
+
+<h3>Dual Motor Driver</h3>
+
+To control the two DC motors, the TB6612FNG dual motor controller form Toshiba is used.
+
+<h3>Wireless</h3>
+
+To remotely get informations from the robot and control it, I decided to equipe the robot with a XBee module from Digi.  On the PC side, an other Xbee module is needed. Basically the XBee is useed to set up an over the air USART connection, which could be achived very easlily through XBee. Also it has to be mentioned, that XBee is again overkill for this purpose. 
+
+<h3>Voltage Regulators</h3>
+
+Two voltage regulators are needed. One for the MCU power supply, and an other one for the motor power supply. The STM32 MCU gets powerde by 5V, thus, the 7805 is used to regulate the 9V batery power. The motors need something about 3V, thus the 1086 is used to regulate an other 9V batery down to 3.3V. For decoupeling [TODO link], also some capacitors (C1-C4) are needed. To get feedback if the power is switched on, two blue LEDs (PWR_LED1, PWR_LED2) are used. On the 5V power supply, also a resistor (R1) needs to be set in front of the LED. 
+
+<h3>Female Connectors</h3>
+
+For not directely soldering the MCU, the XBee and the motor driver, I decided to use a bunch of female connectors to make them pluggable. Also I used a connector to make the motors and sensors pluggable (since I want the top level to be detachable, and the sensors reside on the lower level of the robot).
+
+
+<h2>Building the Robot</h2>
+
+<h3>The Hardware</h3>
+
+I tried to start step by step when building the robot (which is always a good approach). I took the single componets, an tried to get them working on a bread-board. First without the MCU (e.g. for the motor driver), then with the MCU (e.g. for the motor driver). By doing so, it is more easy to tell where the problem resides if something goes wrong. If the setup without the MCU works, the failure may be in the connection to the MCU, ore in the software. On the other hand, one needs not to star writing software, if the hardware by itself doesn't work properly. 
+
+[TODO: add bread-board-images, odometrie etc.]
+
+After a while I ended up with the whole robot setup on two bread-boards, and a rough scetch of the firmware which let me control the basic driving functions remoteley. I managed to put the bread-boards on the robots back, and then haed a bread-board which I could drive around. With this bread-board robot, I developed the basic firmware for the autonomous mode. The bread-board intermediate allowed me to easily make fixes and changes to the hardware in an early stage. At the moment when I realized, that things seem to stabilize, I soldered the hardware stuff to a 160x100 plate.   
+
+<h3>Schematic</h3>
+
+The picture below shows the whole schematic for rob01. It also includes an JTAG connector, since I prefer JTAG over ST-Link for programming the STM32 Discovery. 
+
+[TODO: add schematic ]
+
+<h3>The Software</h3>
+
+The firmware for the robot is roughly build up by the layers shown blow:
+
+<pre>
+ +--------------------------------+
+ | Shell                          |
+ +-----------------------------+  |
+ +---------------------------+ |  |
+ | Drive Control             | |  |
+ +---------------------------+ |  |      
+ +---------+ +----------+ +----+  |
+ | Sensors | | Actors   | | Shell |
+ +---------+ +----------+ +-------+
+ +--------------------------------+ 
+ | Devices                        |
+ +--------------------------------+
+ +--------------------------------+
+ | Hardware / libopencm3          |
+ +--------------------------------+
+</pre>
+
+<h4>Hardware / libopencm3</h4>
+
+To access basic functions, like GPIO, USART etc., of the STM32 hardware, libopencm3 is used. 
+ 
+<h4>Devices</h4>
+
+Each device provided by the hardware is represented by it own device implementation. Currently the following devices are defined:
+
+<table>
+<tr><td>Device</td><td>Description</td></tr>
+<tr><td>bumpersensor</td><td>The GP2Y bumersensors for obstacle detection.</td></tr>
+<tr><td>button</td><td>The (build in) push button to switch btw. autonomous and RC mode.</td></tr>
+<tr><td>dcmotor</td><td>The DC motors driven by the TB6612FNG</td></tr>
+<tr><td>led</td><td>The (build in) status LEDs (currently not used).</td></tr>
+<tr><td>refsensor</td><td>The QTR reflection sensors used to count wheel turns.</td></tr>
+<tr><td>serial</td><td>The USART used for the shell.</td></tr>
+</table>
+
+Each device defines a C structure which holds all the needed informations to initialize and operate a device. E.g. the structure for the DC motor looks like this:
+
+<pre>
+typedef struct {
+     /**
+      * Port 1 for motor control. E.g. GPIOC.
+      */
+     uint32_t   port_ctrl1;
+
+     /**
+      * Pin 1 for motor control. E.g. GPIO4.
+      */
+     uint16_t    pin_ctrl1;
+
+     /**
+      * Port 2 for motor control. E.g. GPIOC.
+      */
+     uint32_t   port_ctrl2;
+
+     /**
+      * Pin 2 for motor control. E.g. GPIO5.
+      */
+     uint16_t    pin_ctrl2;
+
+     /**
+      * Port on which PWM for speed control is connected to H-Bridge. E.g. GPIOC.
+      */
+     uint32_t   port_pwm;
+
+     /**
+      * Pin on which PWM for speed control is connected to H-Bridge. E.g. GPIO6.
+      */
+     uint16_t    pin_pwm;
+} device_data_dcmotor;
+</pre>
+
+Also the operations to perform on a device are defined. Again for the DC motor it looks like so:
+
+<pre>
+/**
+ * Make the DC motor turn clock-wise.
+ *
+ * @param[in]   *dev    device representing the DC motor
+ */
+void dcmotor_cw(device *dev);
+
+/**
+ * Make the DC motor turn counter-clock-wise.
+ *
+ * @param[in]   *dev    device representing the DC motor
+ */
+void dcmotor_ccw(device *dev);
+
+/**
+ * Make the DC motor break (by shortening the moters power supply).
+ *
+ * @param[in]   *dev    device representing the DC motor
+ */
+void dcmotor_break(device *dev);
+
+/**
+ * Make the DC motor float.
+ *
+ * @param[in]   *dev    device representing the DC motor
+ */
+void dcmotor_float(device *dev);
+</pre>
+
+Then within a board definition those structs are filled with concrete values, and passed to the board init function. This function calls for each device the corresponding init function. Thus it is possible to easily support different ports where the devices may be connected to different PINs. For the DC motors, connected to the STM32 board, this looks like shown below:
+
+<pre>
+// Define the DC motors
+device_data_dcmotor dcmotor_left_data = {
+     .port_ctrl1        = GPIOB,        // AIN1 @ PA5
+     .pin_ctrl1         = GPIO5,
+     .port_ctrl2        = GPIOC,        // AIN2 @ PC12
+     .pin_ctrl2         = GPIO12,
+     .port_pwm          = GPIOC,        // PWMA @ PC11
+     .pin_pwm           = GPIO11,
+};
+
+device_data_dcmotor dcmotor_right_data = {
+     .port_ctrl1        = GPIOB,        // BIN1 @ PB7
+     .pin_ctrl1         = GPIO7,
+     .port_ctrl2        = GPIOB,        // BIN2 @ PB8
+     .pin_ctrl2         = GPIO8,
+     .port_pwm          = GPIOB,        // PWMB @ PB9
+     .pin_pwm           = GPIO9,
+};
+
+device dcmotor_left = {
+     .id        = "DC_MOT_LEFT",
+     .rcc_reg   = &RCC_APB2ENR,
+     .rcc_en    = RCC_APB2ENR_IOPBEN | RCC_APB2ENR_IOPCEN,
+     .data      = (device_data *)&dcmotor_left_data,
+     .init      = dcmotor_init,
+};
+
+device dcmotor_right = {
+     .id        = "DC_MOT_RIGHT",
+     .rcc_reg   = &RCC_APB2ENR,
+     .rcc_en    = RCC_APB2ENR_IOPBEN,
+     .data      = (device_data *)&dcmotor_right_data,
+     .init      = dcmotor_init,
+};
+</pre>
+
+All devices are then "collected" in the board device struct, so they could be passed to the board init function later on:
+
+<pre>
+// All my board devcies
+board_devices my_devices = {
+     .size = 10,
+     .device_array = {
+          &serial,
+          &status_led1,
+          &status_led2,
+          &dcmotor_left,
+          &dcmotor_right,
+          &bumpersensor_left,
+          &bumpersensor_right,
+          &refsensor_left,
+          &refsensor_right,
+          &button_user1,
+     },
+};
+</pre>
+
+It is intended to later on expand that concept, and use the firmware to not only support one specific robot, but many (yes, work for rob02 is already in progress)
+
+<h4>Sensors</h4>
+
+Obove the device layer, the sensors layer is located. This layer further more abstracts form the underlaying hardware to a "business" function. The following sensors are currently known by the firmware:
+
+<table>
+<tr><td>Sensor</td><td>Description</td></tr>
+<tr><td>bumper</td><td>The front left/right bumper sensors. The bumper devices are used here.</td></tr>
+<tr><td>odometer</td><td>The odometric sensors for counting wheel turns. The refsensor devices are used here.</td></tr>
+</table>
+
+The values for the sensors are aquired within the systick interrupt, and then written into a global sensor values struct. They are used later on by the drive control layer. For the odometric sensors also the PPM is calculeted. PPM stands for "Pulses-Per-Minute". Each transition form the balck to the white area and vice versa on the gear gives a "pulse". By calculating the PPM, the drive control later on could determine, if a wheel is getting slugish or stuck. Since aquiring of the sensor values is done within the systick interrupt, the main application needs not to care about driving the sensors.
+ 
+<h4>Actors</h4>
+
+Beside the sensors, there is one actor: the vehicle. This actor is made up by the two DC motor devices. The vehicle actor has operations to move into its various directions, turn around or break. By introducing a vehicle actor, which takes directions, the drive control layer later on has not to care if the vehicle uses two DC motors, four DC motors, servos etc. 
+
+<h4>Drive Control</h4>
+
+The drive control layer brings together the sensors and actors, and implements the autonomous mode for the robot. It consists of two main routines: "find path" and "follow path". The first one decides based on the aggregsted sensor values which direction to follow next (and for how many wheel turns). The second one then tries to execute that path. Follwing a path could be aborted at any time when a new obstacle is detected within the path currently followed. If path executing is aborted, "find path" is called again to determine a new direction to follow. The very simple path finding algorithim looks like this:
+
+<pre>
+void drive_control_find_path(path_segment *ps)
+{
+     ps->count = 2;
+
+     int stat = drive_control_agregate_sensors(1);
+
+     switch(stat) {
+     case DRIVE_CTRL_OBST_ALL:
+          ps->direction = VEHICLE_DIR_NONE;
+          break;
+     case DRIVE_CTRL_OBST_FRONT_BOTH:
+          ps->direction = VEHICLE_DIR_BACKWARD;
+          ps->count = 3;
+          break;
+     case DRIVE_CTRL_OBST_BACK_BOTH:
+          ps->direction = VEHICLE_DIR_FORWARD;
+          ps->count = 0;
+          break;
+     case DRIVE_CTRL_OBST_FRONT_LEFT:
+          ps->direction = VEHICLE_DIR_TURN_RIGHT;
+          break;
+     case DRIVE_CTRL_OBST_FRONT_RIGHT:
+          ps->direction = VEHICLE_DIR_TURN_LEFT;
+          break;
+     case DRIVE_CTRL_OBST_BACK_LEFT:
+          ps->direction = VEHICLE_DIR_TURN_RIGHT;
+     case DRIVE_CTRL_OBST_BACK_RIGHT:
+          ps->direction = VEHICLE_DIR_TURN_LEFT;
+          break;
+     case DRIVE_CTRL_OBST_NONE:
+          ps->direction = VEHICLE_DIR_FORWARD;
+          ps->count = 0;
+          break;
+     };
+}
+</pre>
+
+Note: "ps" is the path segment structure which defines the next path segment to follow. It consists of a direction, and a wheel count value. A count of zero means: follow this directin until an obstacle is detected. 
+
+The sesnsor aggregatino takes the current values of the bumper sensors, and the PPM of the wheels and tries to fill an integer with flags for each direction an obstacle is detected. E.g. if the right bumber sensor sees an obstacle, and the left wheels PPM is below the minimum PPM (it is stuck), the flags for "obstacle right" and "obstacle left" are set. 
+
+By using the PPM, it is possible to detect, if the vehicle crashed on an obstacle not seen by the bumper sensors (e.g. while driving backwards). 
+
+<h4>Shell</h4>
+
+The topmost layer is the shell. The shell could be reached through a serial line. In the case of rob01 the serial line is "arifiyed" by a XBee module. Thus, one could log into the robot at any time by using a simple serial terminal. The shell offers some commands to drive the robot manually, to query the sensor values or to switch from/to autonomous mode. Since the USART receiving is done interrupt driven, the main application loop needs not to care about handling shell events. I also started to build a counter part for the shell, the ncurses based "RobotControlRC", which allowed one to e.g. use the arrow keys to move the robot, but the firmware advanced, while the "RobotControlRC" did not (eventually I will update RC one day). 
+
+[TODO: add screenshots of shell and NC]
+
+Beside the "normal" firmware I build a special test firmware which includes a test shell. This tesht shell includes commands to check the functionality of all the build in hardware, and software. It comes in handy, when plugging together the hartware, and one wants to make sure, the left bumper is really the left bumper, and clock-wise really turns the motor clock-wise. 
+
+<h2>Conclusions</h2>
+
+Buling a robot for sure is one of the most fun ways to learn more about microcontrollers and electronics. A fairly functional autonomous robot could be build up from widely avilable and cheap parts. There is no need to by a complete (build up) kid for more (beside it would take out most of the fun). 
+
+The only really expensive part on rob01 are the XBee modules. They are easy to use, but overkill (no mesh networking, no device profiles etc. are needed). I definitely will replace XBee with somethings cheaper (e.g. one of this Nordic 2.4 GHz receivers) next time. 
+
+Also the Arexx platform is a great starter, one should not expect to much from it. The motors and gears are not very accurate, the vehicle barely manages to follow a straight line. The bumper sensors used are very easy to handle, but with a range of only 10 cms they really do not "see" much. Thus using a ultrasonic range finder on a pan-tilt unit would be definitely the better choice. 
+
+Trying to detect if the wheels are stuck turned out to be not that easy and releayable. I got it working for a certion floor surface, but I thing on an other surface it may fail. This concept really has to be thought over. 
+
+Working with libopencm3 turned out to be a very usable open source alternative to the STM standard library. It is fairly easy to use, and lightweight. The library comes with a bunch of more or less good examples. The only down-side about the libopencm3 is, that there is not much documentaiton available on the net. 
+
+So, on to rob02 :-)
+
+<h2>Downloads</h2>
+
+<ul>
+<li>Schematics (gschem)</li>
+<li>Firmware Sources</li>
+</ul>
