@@ -20,7 +20,7 @@
 #ifndef __BOARD_H_
 #define __BOARD_H_
 
-#include <libopencm3/stm32/systick.h>
+#include <libopencm3/cm3/systick.h>
 
 #include <stdint.h>
 

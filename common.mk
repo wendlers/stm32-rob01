@@ -20,7 +20,7 @@ CFLAGS		+= -MD $(INCDIR) -DSTM32F1
 LDSCRIPT	 = $(BINARY).ld
 LIBDIR		 = -L$(HOME)/sat/arm-none-eabi/lib 
 LIBS		 = -lopencm3_stm32f1 
-LDFLAGS		+= $(LIBDIR) $(LIBS) -T$(LDSCRIPT) -nostartfiles -Wall,--gc-sections 
+LDFLAGS		+= $(LIBDIR) $(LIBS) -T$(LDSCRIPT) -nostartfiles -Wall
 LDFLAGS		+= -mthumb -march=armv7 -mfix-cortex-m3-ldrd -msoft-float 
 
 # where to put generated binaries to 
